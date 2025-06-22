@@ -101,12 +101,14 @@ ip6tables -P INPUT DROP 1>&- 2>&-
 
 # accept input to tunnel adapter
 iptables -A INPUT -i "${VPN_DEVICE_TYPE}" -j ACCEPT
+ip6tables -A INPUT -i "${VPN_DEVICE_TYPE}" -j ACCEPT
 
 # accept input to/from LANs (172.x range is internal dhcp)
 iptables -A INPUT -s "${docker_network_cidr}" -d "${docker_network_cidr}" -j ACCEPT
 
 # accept input to vpn gateway
 iptables -A INPUT -i "${docker_interface}" -p $VPN_PROTOCOL --sport $VPN_PORT -j ACCEPT
+ip6tables -A INPUT -i "${docker_interface}" -p $VPN_PROTOCOL --sport $VPN_PORT -j ACCEPT
 
 # accept input to qBittorrent webui port
 iptables -A INPUT -i "${docker_interface}" -p tcp --dport 8080 -j ACCEPT
@@ -133,6 +135,7 @@ fi
 
 # accept input icmp (ping)
 iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
+ip6tables -A INPUT -p ipv6-icmp -j ACCEPT
 
 # accept input to local loopback
 iptables -A INPUT -i lo -j ACCEPT
@@ -148,12 +151,14 @@ ip6tables -P OUTPUT DROP 1>&- 2>&-
 
 # accept output from tunnel adapter
 iptables -A OUTPUT -o "${VPN_DEVICE_TYPE}" -j ACCEPT
+ip6tables -A OUTPUT -o "${VPN_DEVICE_TYPE}" -j ACCEPT
 
 # accept output to/from LANs
 iptables -A OUTPUT -s "${docker_network_cidr}" -d "${docker_network_cidr}" -j ACCEPT
 
 # accept output from vpn gateway
 iptables -A OUTPUT -o "${docker_interface}" -p $VPN_PROTOCOL --dport $VPN_PORT -j ACCEPT
+ip6tables -A OUTPUT -o "${docker_interface}" -p $VPN_PROTOCOL --dport $VPN_PORT -j ACCEPT
 
 # if iptable mangle is available (kernel module) then use mark
 if [[ $iptable_mangle_exit_code == 0 ]]; then
@@ -188,6 +193,7 @@ fi
 
 # accept output for icmp (ping)
 iptables -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
+ip6tables -A OUTPUT -p ipv6-icmp -j ACCEPT
 
 # accept output from local loopback adapter
 iptables -A OUTPUT -o lo -j ACCEPT
