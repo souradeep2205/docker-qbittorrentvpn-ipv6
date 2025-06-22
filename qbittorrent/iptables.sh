@@ -202,5 +202,7 @@ echo "[INFO] iptables defined as follows..." | ts '%Y-%m-%d %H:%M:%.S'
 echo "--------------------"
 iptables -S
 echo "--------------------"
+ip6tables -S
+echo "--------------------"
 
 exec /bin/bash /etc/qbittorrent/start.sh
