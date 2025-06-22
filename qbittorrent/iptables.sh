@@ -199,9 +199,9 @@ ip6tables -A OUTPUT -p ipv6-icmp -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 
 echo "[INFO] iptables defined as follows..." | ts '%Y-%m-%d %H:%M:%.S'
-echo "--------------------"
+echo "--------IPv4 tables------------"
 iptables -S
-echo "--------------------"
+echo "--------IPv6 tables------------"
 ip6tables -S
 echo "--------------------"
 

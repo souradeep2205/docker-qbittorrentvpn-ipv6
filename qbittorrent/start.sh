@@ -98,6 +98,10 @@ fi
 
 # Start qBittorrent
 echo "[INFO] Starting qBittorrent daemon..." | ts '%Y-%m-%d %H:%M:%.S'
+
+# test sleep
+sleep 5m
+
 /bin/bash /etc/qbittorrent/qbittorrent.init start &
 chmod -R 755 /config/qBittorrent
 
