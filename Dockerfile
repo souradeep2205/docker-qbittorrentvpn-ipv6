@@ -43,6 +43,7 @@ RUN echo "deb http://deb.debian.org/debian/ bullseye non-free" > /etc/apt/source
     && apt -y upgrade \
     && apt -y install --no-install-recommends \
     unrar \
+    curl  \
     p7zip-full \
     unzip \
     zip \
