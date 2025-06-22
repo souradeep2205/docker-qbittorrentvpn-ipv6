@@ -107,7 +107,7 @@ ip6tables -A INPUT -i "${VPN_DEVICE_TYPE}" -j ACCEPT
 iptables -A INPUT -s "${docker_network_cidr}" -d "${docker_network_cidr}" -j ACCEPT
 
 # accept input to vpn gateway
-iptables -A INPUT -i "${docker_interface}" -p $VPN_PROTOCOL --sport $VPN_PORT -j ACCEPT
+#iptables -A INPUT -i "${docker_interface}" -p $VPN_PROTOCOL --sport $VPN_PORT -j ACCEPT
 ip6tables -A INPUT -i "${docker_interface}" -p $VPN_PROTOCOL --sport $VPN_PORT -j ACCEPT
 
 # accept input to qBittorrent webui port
@@ -157,7 +157,7 @@ ip6tables -A OUTPUT -o "${VPN_DEVICE_TYPE}" -j ACCEPT
 iptables -A OUTPUT -s "${docker_network_cidr}" -d "${docker_network_cidr}" -j ACCEPT
 
 # accept output from vpn gateway
-iptables -A OUTPUT -o "${docker_interface}" -p $VPN_PROTOCOL --dport $VPN_PORT -j ACCEPT
+#iptables -A OUTPUT -o "${docker_interface}" -p $VPN_PROTOCOL --dport $VPN_PORT -j ACCEPT
 ip6tables -A OUTPUT -o "${docker_interface}" -p $VPN_PROTOCOL --dport $VPN_PORT -j ACCEPT
 
 # if iptable mangle is available (kernel module) then use mark
