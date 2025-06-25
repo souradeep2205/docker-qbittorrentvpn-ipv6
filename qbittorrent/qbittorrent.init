@@ -28,7 +28,7 @@ PIDFILE="/var/run/$NAME.pid"
 QBITTORRENTLOGPATH="/config/qBittorrent/data/logs/"
 QBITTORRENTLOG="qbittorrent.log"
 
-DAEMON="/usr/local/bin/qbittorrent-nox"
+DAEMON="/usr/bin/qbittorrent-nox"
 DAEMON_ARGS="--profile=/config"
 DAEMONSTRING="$DAEMON $DAEMON_ARGS >> $QBITTORRENTLOGPATH$QBITTORRENTLOG 2>&1"
 

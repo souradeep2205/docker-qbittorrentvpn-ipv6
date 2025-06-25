@@ -36,7 +36,7 @@ RUN echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.li
     /tmp/* \
     /var/tmp/*
 
-# Install (un)compressing tools like unrar, 7z, unzip and zip
+# Install (un)compressing tools like unrar, 7z, unzip and zip and qbittorrent nox
 RUN echo "deb http://deb.debian.org/debian/ bullseye non-free" > /etc/apt/sources.list.d/non-free-unrar.list \
     && printf 'Package: *\nPin: release a=non-free\nPin-Priority: 150\n' > /etc/apt/preferences.d/limit-non-free \
     && apt update \
@@ -44,6 +44,7 @@ RUN echo "deb http://deb.debian.org/debian/ bullseye non-free" > /etc/apt/source
     && apt -y install --no-install-recommends \
     unrar \
     curl  \
+    qbittorrent-nox \
     p7zip-full \
     unzip \
     zip \
