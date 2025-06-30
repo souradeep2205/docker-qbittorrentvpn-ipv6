@@ -2,7 +2,82 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/dyonr/qbittorrentvpn)](https://hub.docker.com/r/dyonr/qbittorrentvpn)
 [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/dyonr/qbittorrentvpn/latest)](https://hub.docker.com/r/dyonr/qbittorrentvpn)
 
-Docker container which runs the latest [qBittorrent](https://github.com/qbittorrent/qBittorrent)-nox client while connecting to WireGuard or OpenVPN with iptables killswitch to prevent IP leakage when the tunnel goes down.
+Docker container which runs the latest [qBittorrent](https://github.com/qbittorrent/qBittorrent)-nox client while connecting to WireGuard or OpenVPN with iptables killswitch to prevent IP leakage when the tunnel goes down. Now Supports IPv6!
+
+## Enabling IPv6 support
+The support is mainly serves the following:
+
+ 1. **Wireguard Endpoint over IPV6**: This means we will be tunneling both IPv4 & IPv6 traffic through an IPv6 network. 
+ 2. **Supporting both IPv4 & IPv6 peers**: Yes, this is possible, but only if the VPN server supports it. Port forwarding to be enabled for both on server side.
+ 
+ For the VPN server setup, we would be using [wg-easy](https://github.com/wg-easy/wg-easy).
+ In wg-easy we should create a seperate docker network before running our container.
+ ```bash
+ docker  network  create  \  
+ -d bridge --ipv6  \ 
+ --subnet 10.42.42.0/24  \  
+ --subnet  fdcc:ad94:bacf:61a3::/64  wg
+ ```
+
+Now, this is the docker run configuration I used. 
+In the WG_HOST variable put your server's IPv6 address!
+Please note the WG_PRE_UP & WG_POST_DOWN variables, as they are the magic behind the port forwarding for qBittorrent. The IP addresses used are the wireguard internal network's address assigned to the different peers.
+After you create the peers on the wg-easy UI, note down their IPv4 address (also IPv6 address if available) and replace in the place where 10.8.0.2 is mentioned below under iptables statement. If you have ipv6 set up please put the address under ip6tables statement.
+
+If the primary network of your device is not 'eth0' then put the approprate name for the iptables & ip6tables lines.
+
+We are using ports 8999 as the qBittorrent's connectable TCP/uTP port. If you wish to change, you can, then replace in the appropriate places in this command.
+
+Since before you run the command, you may not have a peer IP address beforehand, so its better you run the command first without the PRE_UP and POST_DOWN variables. Create the peers. Note down the peer's addresses. Stop wg-easy container. Re-edit the docker run statement with the variables and run it. You are good to go!
+
+```bash
+docker  run  -d  \
+--network  wg  \
+-e  INSECURE=true  \
+-e  WG_HOST="[SERVER IPV6 ADDRESS]"  \
+-e  WG_PRE_UP="iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 8999 -j DNAT --to-destination 10.8.0.2; iptables -t nat -A PREROUTING -i eth0 -p udp --dport 8999 -j DNAT --to-destination 10.8.0.2; ip6tables -t nat -A PREROUTING -i eth0 -p tcp --dport 8999 -j DNAT --to-destination fdcc:ad94:bacf:61a4::cafe:2; ip6tables -t nat -A PREROUTING -i eth0 -p udp --dport 8999 -j DNAT --to-destination fdcc:ad94:bacf:61a4::cafe:2"  \
+-e  WG_POST_DOWN="iptables -t nat -D PREROUTING -i eth0 -p tcp --dport 8999 -j DNAT --to-destination 10.8.0.2; iptables -t nat -D PREROUTING -i eth0 -p udp --dport 8999 -j DNAT --to-destination 10.8.0.2; ip6tables -t nat -D PREROUTING -i eth0 -p tcp --dport 8999 -j DNAT --to-destination fdcc:ad94:bacf:61a4::cafe:2; ip6tables -t nat -D PREROUTING -i eth0 -p udp --dport 8999 -j DNAT --to-destination fdcc:ad94:bacf:61a4::cafe:2"  \
+--name  wg-easy  \
+--ip6  fdcc:ad94:bacf:61a3::2a  \
+--ip  10.42.42.42  \
+-v  ~/.wg-easy:/etc/wireguard  \
+-v  /lib/modules:/lib/modules:ro  \
+-p  51820:51820/udp  \
+-p  51821:51821/tcp  \
+-p  8999:8999/tcp  \
+-p  8999:8999/udp  \
+--cap-add  NET_ADMIN  \
+--cap-add  SYS_MODULE  \
+--sysctl  net.ipv4.ip_forward=1  \
+--sysctl  net.ipv4.conf.all.src_valid_mark=1  \
+--sysctl  net.ipv6.conf.all.disable_ipv6=0  \
+--sysctl  net.ipv6.conf.all.forwarding=1  \
+--sysctl  net.ipv6.conf.default.forwarding=1  \
+--restart  unless-stopped  \
+ghcr.io/wg-easy/wg-easy:latest
+```
+Once this is done, get the wireguard config file, store it in the client.
+On the client, make sure to [enable IPV6 for docker's default bridge network](https://docs.docker.com/engine/daemon/ipv6/#use-ipv6-for-the-default-bridge-network). Also, make sure you change the IPv6 subnet CIDR and not use the example one. Please usee this [tool](https://www.site24x7.com/tools/ipv6-subnetcalculator.html) to generate a locally routable /64 subnet.
+Use the following docker run config for running this container.
+```bash
+sudo docker run --name qbv6 -d \
+              -v /home/ubuntu/wireguardconfig:/config \
+              -v /mnt/ubuntu/qbit_downloads:/downloads \
+              -e "VPN_ENABLED=yes" \
+              -e "VPN_TYPE=wireguard" \
+              -e "LAN_NETWORK=192.168.0.0/16" \
+              -e "RESTART_CONTAINER=no" \
+              -p 8080:8080 \
+              --restart unless-stopped \
+              --cap-add NET_ADMIN \
+              --sysctl net.ipv6.conf.all.disable_ipv6=0 \
+              --sysctl net.ipv4.conf.all.src_valid_mark=1 \
+              qvpnipv6:latest
+```
+Please follow the rest of the guide for the other configurations.
+
+-----------------------------------------------------------
+
 
 [preview]: https://raw.githubusercontent.com/DyonR/docker-templates/master/Screenshots/qbittorrentvpn/qbittorrentvpn-webui.png "qBittorrent WebUI"
 ![alt text][preview]
