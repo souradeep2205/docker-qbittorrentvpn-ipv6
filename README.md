@@ -26,7 +26,7 @@ After you create the peers on the wg-easy UI, note down their IPv4 address (also
 
 If the primary network of your device is not 'eth0' then put the approprate name for the iptables & ip6tables lines.
 
-We are using ports 8999 as the qBittorrent's connectable TCP/uTP port. If you wish to change, you can, then replace in the appropriate places in this command.
+We are using ports 8999 as the qBittorrent's connectable TCP/uTP port. If you wish to change, you can, then replace in the appropriate places in this command. Also make sure to change the port in qBittorrent UI.
 
 Since before you run the command, you may not have a peer IP address beforehand, so its better you run the command first without the PRE_UP and POST_DOWN variables. Create the peers. Note down the peer's addresses. Stop wg-easy container. Re-edit the docker run statement with the variables and run it. You are good to go!
 
@@ -72,7 +72,7 @@ sudo docker run --name qbv6 -d \
               --cap-add NET_ADMIN \
               --sysctl net.ipv6.conf.all.disable_ipv6=0 \
               --sysctl net.ipv4.conf.all.src_valid_mark=1 \
-              qvpnipv6:latest
+              5727sde/docker-qbittorrentvpn-ipv6:latest
 ```
 Please follow the rest of the guide for the other configurations.
 
